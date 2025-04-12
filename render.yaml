@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: volunteer-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 8080
+      - key: MONGODB_URI
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://sakshamv259.github.io,https://assignment1-github-io.vercel.app
+    healthCheckPath: /api/health
+    autoDeploy: true
+    headers:
+      - path: /*
+        name: Access-Control-Allow-Credentials
+        value: "true"
+      - path: /*
+        name: Access-Control-Allow-Methods
+        value: "GET,POST,PUT,DELETE,OPTIONS"
+      - path: /*
+        name: Access-Control-Allow-Headers
+        value: "Content-Type,Authorization,Accept,Origin,X-Requested-With"
+      - path: /*
+        name: Vary
+        value: "Origin"
+      - path: /*
+        name: Strict-Transport-Security
+        value: "max-age=31536000; includeSubDomains"
+    domains:
+      - volunteer-backend-cy21.onrender.com 
