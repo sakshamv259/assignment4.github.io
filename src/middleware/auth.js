@@ -5,6 +5,13 @@ const attachUser = (req, res, next) => {
         hasUser: !!(req.session && req.session.user),
         sessionID: req.sessionID
     });
+    
+    // Make sure req.user exists - some routes may depend on this
+    if (req.session && req.session.user) {
+        req.user = req.session.user;
+        console.log('[Auth Middleware] User attached to request:', req.user.username);
+    }
+    
     next();
 };
 
@@ -25,12 +32,16 @@ const isAuthenticated = (req, res, next) => {
         });
     }
 
-    console.log('[Auth Middleware] User authenticated:', req.session.user.username);
+    // Ensure user is attached to request object
+    req.user = req.session.user;
+    console.log('[Auth Middleware] User authenticated:', req.user.username);
     next();
 };
 
 const isAdmin = (req, res, next) => {
     if (req.session && req.session.user && req.session.user.role === 'admin') {
+        // Ensure user is attached to request object
+        req.user = req.session.user;
         return next();
     }
     res.status(403).json({ success: false, message: 'Admin access required' });

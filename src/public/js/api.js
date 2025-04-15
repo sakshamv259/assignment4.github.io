@@ -240,21 +240,41 @@ async function getEvents() {
 
 async function createEvent(eventData) {
     try {
+        console.log('[API] Creating event:', { 
+            ...eventData, 
+            description: eventData.description.substring(0, 20) + '...' 
+        });
+        
         const response = await fetch(`${API_BASE_URL}/events`, {
             ...defaultFetchOptions,
             method: 'POST',
             body: JSON.stringify(eventData)
         });
         
+        // Handle non-JSON responses
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.error('[API] Non-JSON response:', await response.text());
+            throw new Error('Invalid response format from server');
+        }
+        
         const data = await response.json();
+        console.log('[API] Create event response:', {
+            status: response.status,
+            success: data.success,
+            message: data.message,
+            error: data.error
+        });
         
         if (!response.ok) {
+            console.error('[API] Error creating event:', data.message, data.error);
             throw new Error(data.message || 'Failed to create event');
         }
         
+        // If successful, return the data
         return data;
     } catch (error) {
-        console.error('Create event error:', error);
+        console.error('[API] Create event error:', error);
         throw error;
     }
 }
