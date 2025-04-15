@@ -105,6 +105,7 @@
     <button id="backToTop" class="back-to-top">↑ Back to Top</button>
 
     <script src="js/api.js"></script>
+    <script src="js/header.js"></script>
     <script>
         // Gallery data
         const galleryItems = [
@@ -140,48 +141,6 @@
             }
         ];
 
-        // Check authentication on page load
-        async function checkAuth() {
-            try {
-                const authenticated = await isAuthenticated();
-                if (!authenticated) {
-                    window.location.replace('login.html');
-                    return;
-                }
-                
-                // Get and display user info
-                const user = await getCurrentUser();
-                if (user) {
-                    const authSection = document.getElementById('auth-section');
-                    if (authSection) {
-                        authSection.innerHTML = `
-                            <div class="d-flex align-items-center">
-                                <span class="me-3" id="userWelcome">Welcome, ${user.username}!</span>
-                                <button class="btn btn-outline-light" id="logoutBtn">Logout</button>
-                            </div>
-                        `;
-                    }
-                }
-            } catch (error) {
-                console.error('Auth check error:', error);
-                window.location.replace('login.html');
-            }
-        }
-
-        // Handle logout
-        async function handleLogout() {
-            try {
-                const result = await logout();
-                if (result.success) {
-                    window.location.replace('login.html');
-                } else {
-                    console.error('Logout failed:', result.message);
-                }
-            } catch (error) {
-                console.error('Logout error:', error);
-            }
-        }
-
         // Load gallery items with error handling
         function loadGallery() {
             const container = document.getElementById('gallery-container');
@@ -213,34 +172,65 @@
             });
         }
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
-            loadGallery();
-            
-            // Add logout button event listener
-            document.body.addEventListener('click', (e) => {
-                if (e.target && e.target.id === 'logoutBtn') {
-                    handleLogout();
+        // Back to top button functionality
+        document.getElementById('backToTop').addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show or hide back-to-top button based on scroll position
+            window.addEventListener('scroll', function() {
+                const backToTopButton = document.getElementById('backToTop');
+                if (window.scrollY > 300) {
+                    backToTopButton.style.display = 'block';
+                } else {
+                    backToTopButton.style.display = 'none';
                 }
             });
-
-            // Back to top button logic
-            const backToTopBtn = document.getElementById("backToTop");
-            window.onscroll = function() {
-                backToTopBtn.style.display = (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) ? "block" : "none";
-            };
-            backToTopBtn.onclick = function() {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            };
+            
+            // Load gallery content
+            loadGallery();
         });
     </script>
 
-    <footer class="py-3 my-4">
-        <p class="text-center text-body-secondary">© <span id="year"></span> Saksham Verma</p>
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Volunteer Connect</h5>
+                    <p>Connecting volunteers with meaningful opportunities since 2023.</p>
+                </div>
+                <div class="col-md-3">
+                    <h5>Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html" class="text-light">Home</a></li>
+                        <li><a href="about.html" class="text-light">About</a></li>
+                        <li><a href="contact.html" class="text-light">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Connect</h5>
+                    <div class="social-icons">
+                        <a href="#" class="text-light me-2"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-light me-2"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-light me-2"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; <span id="currentYear"></span> Volunteer Connect. All rights reserved.</p>
+                    <script>
+                        document.getElementById('currentYear').textContent = new Date().getFullYear();
+                    </script>
+                </div>
+            </div>
+        </div>
     </footer>
-    <script>
-        document.getElementById('year').textContent = new Date().getFullYear();
-    </script>
 </body>
 </html>
