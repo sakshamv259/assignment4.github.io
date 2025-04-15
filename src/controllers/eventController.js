@@ -3,22 +3,12 @@ const Event = require('../models/Event');
 // Create a new event
 const createEvent = async (req, res) => {
     try {
-        // Log the user info for debugging purposes
         console.log('[Events] Create event request:', {
-            sessionUser: req.session?.user ? {
-                id: req.session.user.id,
-                username: req.session.user.username
-            } : null,
-            reqUser: req.user ? {
-                id: req.user.id,
-                username: req.user.username
-            } : null,
+            user: req.session?.user?.id || 'not authenticated',
             body: { ...req.body, description: req.body.description?.substring(0, 20) + '...' }
         });
         
-        // Make sure user is authenticated
-        if (!req.session?.user?.id && !req.user?.id) {
-            console.log('[Events] Authentication failed - no user in session or request');
+        if (!req.session?.user?.id) {
             return res.status(401).json({ 
                 success: false,
                 message: 'Authentication required' 
@@ -27,12 +17,6 @@ const createEvent = async (req, res) => {
 
         const { title, description, date, time, location, category } = req.body;
         
-        // Get the user ID from req.user or req.session.user
-        const userId = req.user?.id || req.session.user.id;
-        
-        console.log(`[Events] Creating event with organizer ID: ${userId}`);
-        
-        // Create event with the user ID as organizer
         const event = new Event({
             title,
             description,
@@ -40,24 +24,21 @@ const createEvent = async (req, res) => {
             time,
             location,
             category,
-            organizer: userId
+            organizer: req.session.user.id
         });
 
-        // Save the event
         await event.save();
         console.log('[Events] Event created successfully:', event._id);
-        
         res.status(201).json({ 
             success: true,
             message: 'Event created successfully', 
             event 
         });
     } catch (error) {
-        console.error('[Events] Error creating event:', error.message || error);
+        console.error('[Events] Error creating event:', error);
         res.status(500).json({ 
             success: false,
-            message: 'Error creating event',
-            error: error.message
+            message: 'Error creating event' 
         });
     }
 };
