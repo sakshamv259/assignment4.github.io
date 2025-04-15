@@ -206,18 +206,34 @@ async function getCurrentUser() {
 // Event functions with CORS support
 async function getEvents() {
     try {
+        console.log('[API] Fetching events from:', `${API_BASE_URL}/events`);
+        
         const response = await fetch(`${API_BASE_URL}/events`, {
             ...defaultFetchOptions
         });
         
-        if (!response.ok) {
-            throw new Error('Failed to fetch events');
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.error('[API] Non-JSON response:', await response.text());
+            throw new Error('Invalid response format from server');
         }
         
         const data = await response.json();
-        return data;
+        console.log('[API] Events response:', {
+            status: response.status,
+            success: data.success,
+            count: data.events?.length || 0
+        });
+        
+        if (!response.ok) {
+            console.error('[API] Error fetching events:', data.message);
+            throw new Error(data.message || 'Failed to fetch events');
+        }
+        
+        // Return events array from the new response format (data.events)
+        return data.events || [];
     } catch (error) {
-        console.error('Get events error:', error);
+        console.error('[API] Get events error:', error);
         throw error;
     }
 }
